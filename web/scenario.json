@@ -108,7 +108,7 @@
   },
   {
    "title": "Southern Star 7",
-   "say": "Of the three silences the model flags, two are honest boats whose transponders failed near the reserve and look exactly like the third. What separates Southern Star 7 is the rest of the evidence: off air at 20:40, eight kilometres west of the reserve, a SAR target inside the reserve at 06:00 that it was one of three silent boats able to be (the ranking even puts another boat first), and at 18:00 a 20 m target alongside the loitering carrier Polar Crown that only it could have reached. The risk model scores every fishing boat over the fortnight and shows what each factor contributed; a ranking by silent hours stands beside it. Then the boat's last sixty hours on a map.",
+   "say": "Of the three silences the model flags, two are honest boats whose transponders failed near the reserve and look exactly like the third. What separates Southern Star 7 is the rest of the evidence: off air at 20:40, eight kilometres west of the reserve, a SAR target inside the reserve at 06:00 that it was one of three silent boats able to be (the ranking even puts another boat first), and at 18:00 a 20 m target alongside the loitering carrier Polar Crown that only it could have reached. On this last day the two satellite passes are aimed at the reserve and at the carrier, so Southern Star 7 is always detected; the held-out evaluation does not force this, and there the radar misses many dark boats. The risk model scores every fishing boat over the fortnight and shows what each factor contributed; a ranking by silent hours stands beside it. Then the boat's last sixty hours on a map.",
    "calls": [
     {
      "key": "risk",

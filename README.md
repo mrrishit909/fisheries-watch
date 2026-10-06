@@ -42,7 +42,8 @@ Demo tokens (local only): `coast-supervisor-demo`, `coast-analyst-demo`, `coast-
    the pair trawlers Bay Sister 1 and 2.
 4. **Southern Star 7.** The radar target inside the reserve at 06:00 could have been any of three silent boats, and the ranking
    even puts Morning Tide 6 first. What settles it is 18:00: a 20 m target alongside Polar Crown that only Southern Star 7 could
-   have reached. The risk model ranks it 5th of 110 (worst silence +3.35, prior violation +1.81, likely partner of a loitering
+   have reached. On this last day the satellite passes are aimed at the reserve and at the carrier, so the demo boat is always
+   detected; the held-out evaluation does not force this. The risk model ranks it 5th of 110 (worst silence +3.35, prior violation +1.81, likely partner of a loitering
    carrier +0.65); its top ten holds 7 of the 12 rule-breakers, against 3 for a ranking by silent hours.
 5. **A case, and a second pair of eyes.** The analyst opens a case; the evidence (the silence, five radar targets it could have
    been, the meeting, the risk contributions, the registry) is frozen into it with its SHA-256. The same analyst cannot escalate it;
