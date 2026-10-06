@@ -1,0 +1,174 @@
+{
+ "service": "fisheries-watch",
+ "run": "demo-1",
+ "tokens": {
+  "supervisor": "coast-supervisor-demo",
+  "analyst": "coast-analyst-demo",
+  "viewer": "coast-viewer-demo"
+ },
+ "steps": [
+  {
+   "title": "A reserve, a fleet and twelve days of AIS",
+   "say": "An invented 400 x 300 km region off a coast with two ports: 110 fishing boats, four reefer carriers and eight cargo ships, and the Coral Bank Marine Protected Area over the best fishing ground. Twelve days of AIS as it was received: well near the coast, worse offshore, badly in the east, with transponders failing on their own. Twice-daily SAR passes that miss small boats, misplace what they see and report wave clutter. The gap and risk models are trained on past cases from three other simulated fortnights. On AIS, boats cross the reserve but none is seen there at fishing speed.",
+   "calls": [
+    {
+     "key": "load",
+     "as": "supervisor",
+     "method": "POST",
+     "path": "/v1/region:load",
+     "body": {
+      "seed": 15
+     }
+    },
+    {
+     "key": "area0",
+     "as": "viewer",
+     "method": "GET",
+     "path": "/v1/areas/{{load.result.area_id}}/activity?hours=288"
+    }
+   ]
+  },
+  {
+   "title": "Two more days, and a batch that does not add up",
+   "say": "The last 48 hours of AIS and four SAR passes arrive, and every detector runs again. A partner feed sends five fixes: one is fine, one puts Morning Tide 3 150 km from where it was minutes earlier and is kept but flagged as a possible spoof, and the rest are refused one by one.",
+   "calls": [
+    {
+     "key": "poll",
+     "as": "analyst",
+     "method": "POST",
+     "path": "/v1/tracks:poll",
+     "body": {
+      "hours": 48
+     }
+    },
+    {
+     "key": "ingest",
+     "as": "analyst",
+     "method": "POST",
+     "path": "/v1/tracks/ingest",
+     "body": {
+      "fixes": [
+       {
+        "mmsi": 200015002,
+        "ts": "2026-10-05T23:45:00+00:00",
+        "x_km": 274.03,
+        "y_km": 157.46,
+        "sog_kn": 3.1
+       },
+       {
+        "mmsi": 200015032,
+        "ts": "2026-10-05T23:45:00+00:00",
+        "x_km": 257.84,
+        "y_km": 180.85,
+        "sog_kn": 3.0
+       },
+       {
+        "mmsi": 999000111,
+        "ts": "2026-10-05T23:45:00+00:00",
+        "x_km": 200,
+        "y_km": 100,
+        "sog_kn": 8
+       },
+       {
+        "mmsi": 200015018,
+        "ts": "2026-10-05T23:45:00",
+        "x_km": 120,
+        "y_km": 70,
+        "sog_kn": 3
+       },
+       {
+        "mmsi": 200015018,
+        "ts": "2026-10-06T09:00:00+00:00",
+        "x_km": 120,
+        "y_km": 70,
+        "sog_kn": 3
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "What the silences, the radar and the meetings say",
+   "say": "Every AIS silence of two hours or more is scored by the gap model: how improbable that silence is given how well AIS is received where the boat was, how near the reserve, how little ground it covered, whether a carrier was loitering within reach. The six-hour rule's count stands beside it. SAR targets with no AIS are matched to the silent boats that could have been there. A carrier loitering offshore with no AIS partner is a possible dark transshipment. The distance-only rule's count stands beside that. Each finding carries the simulation truth.",
+   "calls": [
+    {
+     "key": "susp",
+     "as": "viewer",
+     "method": "GET",
+     "path": "/v1/events/suspicious?hours=48&top=8"
+    },
+    {
+     "key": "area",
+     "as": "viewer",
+     "method": "GET",
+     "path": "/v1/areas/{{load.result.area_id}}/activity?hours=48"
+    }
+   ]
+  },
+  {
+   "title": "Southern Star 7",
+   "say": "Of the three silences the model flags, two are honest boats whose transponders failed near the reserve and look exactly like the third. What separates Southern Star 7 is the rest of the evidence: off air at 20:40, eight kilometres west of the reserve, a SAR target inside the reserve at 06:00 that it was one of three silent boats able to be (the ranking even puts another boat first), and at 18:00 a 20 m target alongside the loitering carrier Polar Crown that only it could have reached. The risk model scores every fishing boat over the fortnight and shows what each factor contributed; a ranking by silent hours stands beside it. Then the boat's last sixty hours on a map.",
+   "calls": [
+    {
+     "key": "risk",
+     "as": "analyst",
+     "method": "POST",
+     "path": "/v1/risk/score",
+     "body": {
+      "top": 10
+     }
+    },
+    {
+     "key": "timeline",
+     "as": "viewer",
+     "method": "GET",
+     "path": "/v1/vessels/ae03fbdf-c338-5861-9510-6d169de322d8/timeline?hours=60"
+    }
+   ]
+  },
+  {
+   "title": "A case, and a second pair of eyes",
+   "say": "The analyst opens a case on Southern Star 7: the evidence is frozen into it with its SHA-256. Asking for an at-sea inspection is an action outside the centre: the analyst who opened the case cannot do it; a supervisor does. Everything is in a hash-chained audit log.",
+   "calls": [
+    {
+     "key": "case",
+     "as": "analyst",
+     "method": "POST",
+     "path": "/v1/cases",
+     "body": {
+      "vessel_id": "ae03fbdf-c338-5861-9510-6d169de322d8",
+      "summary": "AIS off for 22 hours from 8 km west of the Coral Bank reserve; one of three silent boats that could have been the SAR target inside it at 06:00; the only boat that could have been the SAR target alongside Polar Crown at 18:00, a likely dark transshipment."
+     }
+    },
+    {
+     "key": "self",
+     "expect_error": true,
+     "as": "analyst",
+     "method": "POST",
+     "path": "/v1/cases/{{case.case_id}}/escalate",
+     "body": {
+      "action": "request_inspection",
+      "note": "my own case"
+     }
+    },
+    {
+     "key": "escalate",
+     "as": "supervisor",
+     "method": "POST",
+     "path": "/v1/cases/{{case.case_id}}/escalate",
+     "body": {
+      "action": "request_inspection",
+      "note": "Patrol vessel to inspect catch and hold on return to port"
+     }
+    },
+    {
+     "key": "audit",
+     "as": "supervisor",
+     "method": "GET",
+     "path": "/v1/audit?limit=12"
+    }
+   ]
+  }
+ ]
+}
